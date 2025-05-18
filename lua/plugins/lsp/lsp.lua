@@ -106,6 +106,11 @@ return {
 
 			-- LSP key mappings for common actions
 			local function on_attach(client, bufnr)
+				-- disable formatting capability for sqls so null-ls can handle it
+				if client.name == "sqls" then
+					client.server_capabilities.documentFormattingProvider = false
+				end
+
 				local map = vim.keymap.set
 				local bufopts = { noremap = true, silent = true, buffer = bufnr }
 				-- LSP Navigation
@@ -124,7 +129,7 @@ return {
 			-- Mason and Mason-LSPconfig setup
 			require("mason").setup()
 			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "pyright", "ruff", "sqls", "yamlls", "ts_ls", "bashls" },
+				ensure_installed = { "lua_ls", "pyright", "ruff", "yamlls", "ts_ls", "bashls", "sqls" },
 				automatic_installation = true,
 			})
 

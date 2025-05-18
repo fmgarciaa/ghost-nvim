@@ -11,13 +11,13 @@ return {
 
 		require("mason-null-ls").setup({
 			ensure_installed = {
-				"stylua",    -- Lua formatter
-				"isort",     -- Python formatter (import sorting)
-				"sql-formatter", -- SQL formatter
-				"sqlfluff",  -- SQL lintern
+				"stylua", -- Lua formatter
+				"isort",  -- Python formatter (import sorting)
+				"sqruff", -- SQL formatter and Lintern
+				"sqlfluff", -- SQL formatter and Lintern
 				"prettier",
-				"yamllint",  -- YAML linter
-				"shfmt",     -- bash formatter
+				"yamllint", -- YAML linter
+				"shfmt",  -- bash formatter
 				"shellcheck", -- bash lintern
 			},
 			automatic_installation = true,
@@ -27,15 +27,14 @@ return {
 		local null_ls = require("null-ls")
 		local formatting = null_ls.builtins.formatting
 		local diagnostics = null_ls.builtins.diagnostics
+		local sqlfluff_config_path = vim.fn.expand("~/.sqlfluff")
 
 		-- Sources (adapted to null-ls names)
 		local sources = {
 			formatting.stylua,
 			formatting.isort,
-			formatting.sql_formatter.with({
-				extra_args = { "--language", "postgresql", "--keyword-case", "upper", "--indent", "4" },
-			}),
-			diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }),
+			diagnostics.sqruff.with({ extra_args = { "--config", sqlfluff_config_path } }),
+			formatting.sqruff.with({ extra_args = { "--config", sqlfluff_config_path } }),
 			formatting.prettier.with({
 				filetypes = {
 					"json",

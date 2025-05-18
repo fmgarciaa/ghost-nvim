@@ -16,7 +16,7 @@ require("lspconfig").ruff.setup({
 				lint = {
 					-- enable specific rule codes
 					select = { "E", "F", "B", "Q", "I", "PL", "D", "AIR", "PL", "ARG", "ERA", "FAST", "DJ", "ANN" },
-					ignore = { "D102", "D107" },
+					ignore = { "D102", "D107", "D100" },
 				},
 				format = {
 					["quote-style"] = "double",

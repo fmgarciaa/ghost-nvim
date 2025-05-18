@@ -11,7 +11,9 @@ local opts = { noremap = true, silent = true }
 
 -- save and exist
 vim.keymap.set("n", "<leader>w", ":w<CR>", opts)        -- save file
-map("i", "<leader>w", "<Esc>:w<CR>a", opts)             -- save file in insert mode
+vim.keymap.set("n", "<leader>W", ":w<CR>", opts)        -- save file
+map("i", "<leader>w", "<Esc>:w<CR>", opts)              -- save file in insert mode
+map("i", "<leader>w", "<Esc>:W<CR>", opts)              -- save file in insert mode
 vim.keymap.set("v", "<leader>w", "<Esc>:w<CR>gv", opts) -- save file in visual mode
 vim.keymap.set("n", "<leader>x", ":wq<CR>", opts)       -- save and exit file
 vim.keymap.set("n", "<leader>c", ":bd<CR>", opts)       -- close file
