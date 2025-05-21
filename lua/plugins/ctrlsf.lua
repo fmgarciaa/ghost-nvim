@@ -1,21 +1,30 @@
 -- Advanced search and replace in multiple files
 return {
-	"dyng/ctrlsf.vim",
-	opts = {}, -- No extensive configuration needed
-	config = function()
-		-- Set ripgrep (rg) as the default search program for better performance
-		vim.g.ctrlsf_ackprg = "rg --vimgrep --hidden"
-		-- Set search root to the project directory
-		vim.g.ctrlsf_default_root = "project"
-		-- Auto close search window after jumping to a result
-		vim.g.ctrlsf_auto_close = 1
-		-- Open search results in a vertical split
-		vim.g.ctrlsf_position = "left"
+  'dyng/ctrlsf.vim',
+  opts = {}, -- No extensive configuration needed
+  config = function()
+    vim.g.ctrlsf_ackprg = 'rg --vimgrep --hidden'
+    vim.g.ctrlsf_default_root = 'project'
+    vim.g.ctrlsf_case_sensitive = 'smart'
+    vim.g.ctrlsf_auto_close = 1
+    vim.g.ctrlsf_position = 'left'
+    vim.g.ctrlsf_winsize = '35%'
+    vim.g.ctrlsf_context = '-C 3'
+    vim.g.ctrlsf_ignore_dir = {
+      'node_modules',
+      '.git',
+      'dist',
+      '__pycache__',
+      '.mypy_cache',
+      '.pytest_cache',
+      '.venv',
+      'env',
+      'venv',
+    }
 
-		-- Keymaps for CtrlSF
-		local opts = { noremap = true, silent = true }
-		vim.keymap.set("n", "<leader>s;", ":CtrlSF ", opts)        -- Start a search
-		vim.keymap.set("n", "<leader>su", ":CtrlSFCwordExec ", opts) -- Search for word under cursor
-		vim.keymap.set("n", "<leader>sc", ":CtrlSFClose<CR>", opts) -- Close search window
-	end,
+    -- Keymaps for CtrlSF
+    local keymap = vim.keymap.set
+    keymap({ 'n', 'i' }, '<C-f>f', ':CtrlSF ', { noremap = true, silent = true, desc = 'Start a search' })
+    keymap('n', '<C-f>c', ':CtrlSFClose<CR>', { noremap = true, silent = true, desc = 'Close search window' })
+  end,
 }
