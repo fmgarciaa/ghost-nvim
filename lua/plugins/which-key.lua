@@ -10,7 +10,7 @@ return {
       { '<leader>t', group = 'Terminal Management' },
       { '<leader>d', group = 'Diagnostic & LSP' },
       { '<leader>e', group = 'Explorer Neotree', icon = { icon = '', color = 'orange' } },
-      { '<leader>a', group = 'AI', icon = { icon = '󰚩', color = 'blue' } },
+      { '<leader>a', group = 'AI', icon = { icon = '󰚩', color = 'blue' }, mode = { 'n', 'v' } },
     }
   end,
 }

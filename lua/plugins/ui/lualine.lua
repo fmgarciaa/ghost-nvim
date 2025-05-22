@@ -25,15 +25,15 @@ return {
       sections = {
         lualine_a = { mode },
         lualine_b = { { 'branch', icon = { '' }, component_separators = { left = '|', right = '' } }, diff },
-        lualine_c = { { 'filename', path = 1 }, 'filetype', 'encoding', 'filesize' },
+        lualine_c = { { 'filename', path = 0 }, 'filetype', 'encoding', 'filesize' },
         lualine_x = { 'diagnostics', { 'fileformat', icons_enabled = false } },
         lualine_y = { 'hostname', get_os, lsp_status, lsp_progress },
-        lualine_z = { copilot_status, codeium_status.status, docker, 'location', progress_file },
+        lualine_z = { copilot_status, codeium_status, docker, { 'location', padding = 0 }, { progress_file, padding = 1 } },
       },
       inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = { { 'filename', path = 1 } },
+        lualine_c = { { 'filename', path = 0 } },
         lualine_x = { { 'location', padding = 0 } },
         lualine_y = {},
         lualine_z = {},
