@@ -71,8 +71,7 @@ keymap('v', 'p', '"_dP', opts)
 -- Diagnostic keymaps
 keymap('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 keymap('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
-keymap('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-keymap('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+keymap('n', '<leader>dd', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 
 -- Others keymaping in:
 -- /lua/plugins/lsp/cmp.lua
@@ -83,3 +82,4 @@ keymap('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics l
 -- /lua/plugins/neotree.lua
 -- /lua/plugins/telescope.lua
 -- /lua/plugins/toggleterm.lua
+-- /lua/plugins/trouble.lua

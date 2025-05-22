@@ -50,4 +50,5 @@ return {
   { 'AndreM222/copilot-lualine' },
   { 'arkav/lualine-lsp-progress' },
   { 'SmiteshP/nvim-navic', lazy = true, requires = 'neovim/nvim-lspconfig' },
+  { 'echasnovski/mini.nvim', version = '*' },
 }

@@ -31,6 +31,7 @@ return {
 
       -- 3. Highlight Copilot entries
       vim.api.nvim_set_hl(0, 'CmpItemKindCopilot', { fg = '#6CC644' })
+      vim.api.nvim_set_hl(0, 'CmpItemKindCodeium', { fg = '#00BFFF' })
 
       cmp.setup {
         snippet = {
@@ -61,6 +62,7 @@ return {
         },
         sources = cmp.config.sources {
           { name = 'copilot', group_index = 2 },
+          { name = 'codeium', group_index = 2 },
           { name = 'nvim_lsp', group_index = 2 },
           { name = 'luasnip', group_index = 2 },
           { name = 'buffer', group_index = 2 },
@@ -72,10 +74,11 @@ return {
             maxwidth = 50,
             ellipsis_char = '...',
             show_labelDetails = true,
-            symbol_map = { Copilot = '' },
+            symbol_map = { Copilot = '', Codeium = '' },
             before = function(entry, vim_item)
               vim_item.menu = ({
                 copilot = '[Copilot]',
+                codeium = '[Codeium]',
                 nvim_lsp = '[LSP]',
                 luasnip = '[Snip]',
                 buffer = '[Buf]',

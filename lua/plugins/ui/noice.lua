@@ -1,51 +1,49 @@
 return {
-	"folke/noice.nvim",
-	event = "VeryLazy",
-	dependencies = {
-		"MunifTanjim/nui.nvim",
-		"rcarriga/nvim-notify",
-	},
-	opts = {
-		cmdline = {
-			enabled = true,
-			view = "cmdline_popup",
-		},
-		messages = {
-			enabled = true,
-			view = "notify",
-			view_error = "notify",
-			view_warn = "notify",
-		},
-		lsp = {
-			override = {
-				["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-				["vim.lsp.util.stylize_markdown"] = true,
-			},
-		},
-		presets = {
-			bottom_search = true,
-			command_palette = true,
-			long_message_to_split = true,
-			lsp_doc_border = "rounded",
-		},
-	},
-	config = function(_, opts)
-		require("noice").setup(opts)
+  'folke/noice.nvim',
+  event = 'VeryLazy',
+  dependencies = {
+    'MunifTanjim/nui.nvim',
+    'rcarriga/nvim-notify',
+  },
+  opts = {
+    cmdline = {
+      enabled = true,
+      view = 'cmdline_popup',
+    },
+    messages = {
+      enabled = true,
+      view = 'notify',
+      view_error = 'notify',
+      view_warn = 'notify',
+    },
+    lsp = {
+      progress = {
+        enabled = false,
+      },
+      override = {
+        ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+        ['vim.lsp.util.stylize_markdown'] = true,
+        ['cmp.entry.get_documentation'] = true,
+      },
+    },
+    presets = {
+      bottom_search = false,
+      command_palette = true,
+      long_message_to_split = true,
+      lsp_doc_border = false,
+    },
+  },
+  config = function(_, opts)
+    require('noice').setup(opts)
 
-		-- More robust key mappings with error handling
-		vim.keymap.set("n", "<leader>nl", function()
-			local ok, msg = pcall(require("noice").cmd, "last")
-			if not ok then
-				vim.notify("Noice: " .. msg, vim.log.levels.WARN)
-			end
-		end, { desc = "Show last message" })
+    -- Configuración de nvim-notify
+    require('notify').setup {
+      stages = 'slide',
+      timeout = 2500,
+      top_down = false,
+    }
 
-		vim.keymap.set("n", "<leader>nh", function()
-			require("noice").cmd("history")
-		end, { desc = "Show message history" })
-
-		vim.keymap.set("n", "<leader>nd", function()
-			require("noice").cmd("dismiss")
-		end, { desc = "Dismiss notifications" })
-	end,
+    --  Set notify as the default handler
+    vim.notify = require 'notify'
+  end,
 }

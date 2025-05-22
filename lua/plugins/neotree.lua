@@ -315,7 +315,7 @@ return {
 
     -- Keymaps for Neotree
     local keymap = vim.keymap.set
-    keymap('n', '<leader>e', ':Neotree toggle position=right<CR>', { noremap = true, silent = true, desc = 'Toggle Neo-tree' })
+    keymap('n', '<leader>e', ':Neotree toggle position=right<CR>', { noremap = true, silent = true })
     keymap('n', '<leader>ngs', ':Neotree float git_status<CR>', { noremap = true, silent = true, desc = 'Show git status in float Neo-tree popup' })
   end,
 }
