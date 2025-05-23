@@ -1,12 +1,12 @@
-local mode = require 'plugins.ui.lualine_comps.mode'
-local diff = require 'plugins.ui.lualine_comps.diff'
-local progress_file = require 'plugins.ui.lualine_comps.progress'
-local docker = require 'plugins.ui.lualine_comps.docker'
-local lsp_status = require('plugins.ui.lualine_comps.lsp_status').status
-local lsp_progress = require 'plugins.ui.lualine_comps.lsp_progress'
-local get_os = require('plugins.ui.lualine_comps.get_os').status
-local copilot_status = require 'plugins.ui.lualine_comps.copilot'
-local codeium_status = require 'plugins.ui.lualine_comps.windsurf'
+local mode = require 'plugins.appearance.lualine_comps.mode'
+local diff = require 'plugins.appearance.lualine_comps.diff'
+local progress_file = require 'plugins.appearance.lualine_comps.progress'
+local docker = require 'plugins.appearance.lualine_comps.docker'
+local lsp_status = require('plugins.appearance.lualine_comps.lsp_status').status
+local lsp_progress = require 'plugins.appearance.lualine_comps.lsp_progress'
+local get_os = require('plugins.appearance.lualine_comps.get_os').status
+local copilot_status = require 'plugins.appearance.lualine_comps.copilot'
+local codeium_status = require 'plugins.appearance.lualine_comps.windsurf'
 
 return {
   'nvim-lualine/lualine.nvim',
