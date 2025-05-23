@@ -1,22 +1,15 @@
+-- Define only the needed prompts
 local prompts = {
-  -- Code related prompts
-  Explain = 'Please explain how the following code works.',
-  Review = 'Please review the following code and provide suggestions for improvement.',
-  Tests = 'Please explain how the selected code works, then generate unit tests for it.',
-  Refactor = 'Please refactor the following code to improve its clarity and readability.',
-  FixCode = 'Please fix the following code to make it work as intended.',
-  FixError = 'Please explain the error in the following text and provide a solution.',
-  BetterNamings = 'Please provide better names for the following variables and functions.',
-  Documentation = 'Please provide documentation for the following code.',
-  SwaggerApiDocs = 'Please provide documentation for the following API using Swagger.',
-  SwaggerJsDocs = 'Please write JSDoc for the following API using Swagger.',
-  -- Text related prompts
-  Summarize = 'Please summarize the following text.',
-  Spelling = 'Please correct any grammar and spelling errors in the following text.',
-  Wording = 'Please improve the grammar and wording of the following text.',
-  Concise = 'Please rewrite the following text to make it more concise.',
-  -- New Smart Commit prompt
   SmartCommit = 'Generate a concise commit message using the Conventional Commits format (e.g., feat, fix, chore). Use only the staged and unstaged Git changes as context.',
+  BetterNames = 'Suggest clearer and more meaningful names for the variables and functions in the selected code. Return only the improved names as suggestions.',
+  AddLogging = 'Insert logging or debugging statements into the selected code to help trace execution or capture errors. Use conventions appropriate for the language.',
+  TypeHints = 'Analyze the selected code and add or suggest type annotations if the language supports them. Improve clarity without changing behavior.',
+  ComplexityReport = 'Analyze the cyclomatic complexity and structure of the selected code. Identify any overly complex sections and suggest simplifications.',
+  SecurityReview = 'Perform a security review of the selected code. Highlight any risky patterns or missing validations and suggest improvements.',
+  RefactorToFunction = 'Refactor the selected block of code into a well-named reusable function or method. Maintain the same behavior and include documentation.',
+  Pseudocode = 'Convert the selected code into clear and concise pseudocode that describes what the code is doing in plain language, step by step.',
+  TranslateToEnglish = 'Explain what the selected code does in plain English. Assume the reader is familiar with programming basics but not this specific language.',
+  RegexExplain = 'Explain what this regular expression does, including the meaning of each part. Return only the explanation in natural language.',
 }
 
 return {
@@ -30,49 +23,51 @@ return {
       answer_header = ' Copilot ',
       error_header = ' Error ',
       model = 'gpt-4o',
-      debug = false,
-      show_help = true,
       prompts = prompts,
       window = {
         layout = 'float',
         border = 'rounded',
+        title = 'Copilot Chat  ',
+        width = 0.75,
+        height = 0.75,
       },
     },
-    cmd = { 'CopilotChat', 'CopilotChatVisual' },
+    cmd = {
+      'CopilotChatCommitSmart',
+      'CopilotChatVisualPrompt',
+      'CopilotChatBufferPrompt',
+      'CopilotChatReset',
+      'CopilotChatModels',
+      'CopilotChatAgents',
+    },
     config = function(_, opts)
       local chat = require 'CopilotChat'
       chat.setup(opts)
 
       local select = require 'CopilotChat.select'
 
-      vim.api.nvim_create_user_command('CopilotChatVisual', function(args)
-        chat.ask(args.args, { selection = select.visual })
-      end, { nargs = '*', range = true })
-
-      vim.api.nvim_create_user_command('CopilotChatInline', function(args)
-        chat.ask(args.args, {
-          selection = select.visual,
-          window = {
-            layout = 'float',
-            relative = 'cursor',
-            width = 1,
-            height = 0.4,
-            row = 1,
-          },
-        })
-      end, { nargs = '*', range = true })
-
-      vim.api.nvim_create_user_command('CopilotChatBuffer', function(args)
-        chat.ask(args.args, { selection = select.buffer })
-      end, { nargs = '*', range = true })
-
-      -- SmartCommit: generate commit message from staged + unstaged diffs only
+      -- Smart Commit command
       vim.api.nvim_create_user_command('CopilotChatCommitSmart', function()
         chat.ask(prompts.SmartCommit, {
           context = { 'git:staged', 'git:unstaged' },
         })
       end, {})
 
+      -- Visual selection prompt
+      vim.api.nvim_create_user_command('CopilotChatVisualPrompt', function()
+        chat.select_prompt {
+          context = { 'visual' },
+        }
+      end, { nargs = '*', range = true })
+
+      -- Buffer-wide prompt
+      vim.api.nvim_create_user_command('CopilotChatBufferPrompt', function()
+        chat.select_prompt {
+          selection = select.buffer,
+        }
+      end, {})
+
+      -- Auto config for Copilot buffers
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = 'copilot-*',
         callback = function()
@@ -80,59 +75,77 @@ return {
           vim.opt_local.number = true
           if vim.bo.filetype == 'copilot-chat' then
             vim.bo.filetype = 'markdown'
+            vim.opt_local.conceallevel = 2
+            vim.opt_local.concealcursor = 'nc'
           end
         end,
       })
     end,
+
     keys = {
       {
-        '<leader>ap',
-        function()
-          require('CopilotChat').select_prompt { context = { 'buffers' } }
-        end,
-        desc = 'CopilotChat - Prompt actions',
+        '<leader>ac',
+        '<cmd>CopilotChatCommitSmart<cr>',
+        desc = 'CopilotChat - Smart Commit message',
       },
       {
-        '<leader>ap',
-        function()
-          require('CopilotChat').select_prompt()
-        end,
+        '<leader>av',
+        ':CopilotChatVisualPrompt<cr>',
         mode = 'x',
-        desc = 'CopilotChat - Prompt actions',
+        desc = 'CopilotChat - Select prompt for visual selection',
       },
-      { '<leader>ae', '<cmd>CopilotChatExplain<cr>', desc = 'CopilotChat - Explain code' },
-      { '<leader>at', '<cmd>CopilotChatTests<cr>', desc = 'CopilotChat - Generate tests' },
-      { '<leader>ar', '<cmd>CopilotChatReview<cr>', desc = 'CopilotChat - Review code' },
-      { '<leader>aR', '<cmd>CopilotChatRefactor<cr>', desc = 'CopilotChat - Refactor code' },
-      { '<leader>an', '<cmd>CopilotChatBetterNamings<cr>', desc = 'CopilotChat - Better Naming' },
-      { '<leader>av', ':CopilotChatVisual<cr>', mode = 'x', desc = 'CopilotChat - Open in vertical split' },
-      { '<leader>ax', ':CopilotChatInline<cr>', mode = 'x', desc = 'CopilotChat - Inline chat' },
+      {
+        '<leader>ab',
+        ':CopilotChatBufferPrompt<cr>',
+        mode = 'n',
+        desc = 'CopilotChat - Select prompt for entire buffer',
+      },
+      {
+        '<leader>al',
+        '<cmd>CopilotChatReset<cr>',
+        desc = 'CopilotChat - Clear buffer and chat history',
+      },
+      {
+        '<leader>a?',
+        '<cmd>CopilotChatModels<cr>',
+        desc = 'CopilotChat - Select Models',
+      },
+      {
+        '<leader>aa',
+        '<cmd>CopilotChatAgents<cr>',
+        desc = 'CopilotChat - Select Agents',
+      },
+      {
+        '<leader>ao',
+        '<cmd>CopilotChat<cr>',
+        desc = 'CopilotChat - Open chat window',
+      },
       {
         '<leader>ai',
         function()
-          local input = vim.fn.input 'Ask Copilot: '
+          local input = vim.fn.input 'Ask Copilot   (visual): '
           if input ~= '' then
-            vim.cmd('CopilotChat ' .. input)
+            require('CopilotChat').ask(input, {
+              context = { 'visual' },
+            })
           end
         end,
-        desc = 'CopilotChat - Ask input',
+        mode = 'x',
+        desc = 'CopilotChat - Ask with manual prompt (visual)',
       },
-      { '<leader>am', '<cmd>CopilotChatCommit<cr>', desc = 'CopilotChat - Generate commit message for all changes' },
       {
-        '<leader>aq',
+        '<leader>ai',
         function()
-          local input = vim.fn.input 'Quick Chat: '
+          local input = vim.fn.input 'Ask Copilot   (buffer): '
           if input ~= '' then
-            vim.cmd('CopilotChatBuffer ' .. input)
+            require('CopilotChat').ask(input, {
+              context = { 'buffer' },
+            })
           end
         end,
-        desc = 'CopilotChat - Quick chat',
+        mode = 'n',
+        desc = 'CopilotChat - Ask with manual prompt (buffer)',
       },
-      { '<leader>af', '<cmd>CopilotChatFixError<cr>', desc = 'CopilotChat - Fix Diagnostic' },
-      { '<leader>al', '<cmd>CopilotChatReset<cr>', desc = 'CopilotChat - Clear buffer and chat history' },
-      { '<leader>a?', '<cmd>CopilotChatModels<cr>', desc = 'CopilotChat - Select Models' },
-      { '<leader>aa', '<cmd>CopilotChatAgents<cr>', desc = 'CopilotChat - Select Agents' },
-      { '<leader>ac', '<cmd>CopilotChatCommitSmart<cr>', desc = 'CopilotChat - Smart Commit message' },
     },
   },
 }
