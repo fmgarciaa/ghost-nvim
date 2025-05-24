@@ -1,123 +1,142 @@
-return {
-  'nvim-telescope/telescope.nvim',
-  event = 'VimEnter',
-  branch = '0.1.x',
-  dependencies = {
-    'nvim-lua/plenary.nvim',
-    { -- If encountering errors, see telescope-fzf-native README for installation instructions
-      'nvim-telescope/telescope-fzf-native.nvim',
-      'nvim-telescope/telescope-ui-select.nvim',
-      -- `build` is used to run some command when the plugin is installed/updated.
-      -- This is only run then, not every time Neovim starts up.
-      build = 'make',
+-- This file configures nvim-telescope/telescope.nvim, a highly extendable fuzzy finder
+-- for Neovim. Telescope can search for files, buffers, Git items, LSP symbols, help tags,
+-- and much more, with a previewer and integration with various other plugins.
 
-      -- `cond` is a condition used to determine whether this plugin should be
-      -- installed and loaded.
+-- Return the plugin specification for lazy.nvim.
+return {
+  'nvim-telescope/telescope.nvim', -- The plugin's repository name.
+  event = 'VimEnter', -- Load Telescope when Neovim has fully started.
+                      -- Can be deferred further (e.g., on first command/keymap) if startup time is critical.
+  branch = '0.1.x', -- Specifies the version branch to use for stability.
+  dependencies = { -- List of plugins that Telescope depends on or integrates with.
+    'nvim-lua/plenary.nvim', -- Plenary provides utility functions used extensively by Telescope.
+    {
+      -- telescope-fzf-native.nvim provides an optional C backend for FZF (fuzzy finding algorithm),
+      -- which can significantly speed up sorting and searching in Telescope.
+      'nvim-telescope/telescope-fzf-native.nvim',
+      -- Note: The original config had 'nvim-telescope/telescope-ui-select.nvim' listed here as well,
+      -- which is unusual as a direct sub-dependency of fzf-native. It's listed again below.
+      -- This build command compiles the C extension for fzf-native.
+      build = 'make',
+      -- This condition checks if 'make' is executable, only loading fzf-native if it can be built.
       cond = function()
         return vim.fn.executable 'make' == 1
       end,
     },
-    { 'nvim-telescope/telescope-ui-select.nvim' },
-
-    -- Useful for getting pretty icons, but requires a Nerd Font.
-    { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+    {
+      -- telescope-ui-select.nvim provides an extension to use Telescope for UI selection prompts,
+      -- for example, replacing `vim.ui.select()`.
+      'nvim-telescope/telescope-ui-select.nvim'
+    },
+    {
+      -- nvim-web-devicons provides icons for file types and other items in Telescope pickers.
+      -- It's enabled only if `vim.g.have_nerd_font` is true (presumably set elsewhere).
+      'nvim-tree/nvim-web-devicons',
+      enabled = vim.g.have_nerd_font -- Assuming vim.g.have_nerd_font is set in the main config.
+    },
   },
-  config = function()
-    -- Telescope is a fuzzy finder that comes with a lot of different things that
-    -- it can fuzzy find! It's more than just a "file finder", it can search
-    -- many different aspects of Neovim, your workspace, LSP, and more!
-    --
-    -- The easiest way to use Telescope, is to start by doing something like:
-    --  :Telescope help_tags
-    --
-    -- After running this command, a window will open up and you're able to
-    -- type in the prompt window. You'll see a list of `help_tags` options and
-    -- a corresponding preview of the help.
-    --
-    -- Two important keymaps to use while in Telescope are:
-    --  - Insert mode: <c-/>
-    --  - Normal mode: ?
-    --
-    -- This opens a window that shows you all of the keymaps for the current
-    -- Telescope picker. This is really useful to discover what Telescope can
-    -- do as well as how to actually do it!
+  config = function() -- Function to run after Telescope and its dependencies are loaded.
+    -- General introduction and help information for Telescope (as comments).
+    -- :Telescope help_tags
+    -- Insert mode: <c-/> or Normal mode: ? for help within Telescope.
 
-    -- [[ Configure Telescope ]]
-    -- See `:help telescope` and `:help telescope.setup()`
+    -- Setup Telescope with global defaults and picker-specific configurations.
     require('telescope').setup {
-      -- You can put your default mappings / updates / etc. in here
-      --  All the info you're looking for is in `:help telescope.setup()`
-      defaults = {
+      defaults = { -- Default settings applied to all Telescope pickers.
+        -- `vimgrep_arguments` configures the command used by `live_grep` and `grep_string`.
+        -- It uses 'rg' (ripgrep) with specific flags for consistent output and behavior.
         vimgrep_arguments = {
           'rg',
-          '--color=never',
-          '--no-heading',
-          '--with-filename',
-          '--line-number',
-          '--column',
-          '--smart-case',
-          '--hidden', -- Asegura que se busquen archivos ocultos
+          '--color=never', -- Disable colors from rg, Telescope handles highlighting.
+          '--no-heading', -- Suppress rg's own headings.
+          '--with-filename', -- Include filename in output.
+          '--line-number', -- Include line number.
+          '--column', -- Include column number.
+          '--smart-case', -- Case-insensitive unless uppercase letters are used in query.
+          '--hidden', -- Search hidden files and directories.
         },
-        mappings = {
-          i = {
-            ['<C-k>'] = require('telescope.actions').move_selection_previous, -- move to prev result
-            ['<C-j>'] = require('telescope.actions').move_selection_next, -- move to next result
-            ['<C-l>'] = require('telescope.actions').select_default, -- open file
+        mappings = { -- Default mappings within Telescope pickers.
+          i = { -- Mappings for Insert mode in the Telescope prompt.
+            ['<C-k>'] = require('telescope.actions').move_selection_previous, -- Move to the previous result.
+            ['<C-j>'] = require('telescope.actions').move_selection_next, -- Move to the next result.
+            ['<C-l>'] = require('telescope.actions').select_default, -- Open the selected item (default action).
+                                                                     -- Note: <CR> (Enter) is usually the default for select_default.
+                                                                     -- Overriding <C-l> might be for specific ergonomic reasons.
           },
+          -- n = { -- Mappings for Normal mode in the Telescope results window can also be set.
+          --   ['q'] = require('telescope.actions').close,
+          -- }
         },
+        -- Other defaults:
+        -- layout_strategy = 'horizontal',
+        -- layout_config = { preview_cutoff = 120, prompt_position = 'bottom' },
+        -- sorting_strategy = 'ascending',
+        -- scroll_strategy = 'cycle',
       },
-      pickers = {
-        find_files = {
+      pickers = { -- Configuration specific to individual Telescope pickers.
+        find_files = { -- For `builtin.find_files`.
+          -- `file_ignore_patterns` lists patterns for files/directories to ignore.
           file_ignore_patterns = { 'node_modules', '.git', '.venv' },
-          hidden = true,
+          hidden = true, -- Show hidden files (dotfiles) by default.
         },
-        live_grep = {
+        live_grep = { -- For `builtin.live_grep`.
           file_ignore_patterns = { 'node_modules', '.git', '.venv' },
+          -- `additional_args` can be a function to dynamically provide extra arguments to rg.
           additional_args = function(_)
-            return { '--hidden' }
+            return { '--hidden' } -- Ensure hidden files are searched in live_grep as well.
           end,
         },
+        -- Other pickers like 'buffers', 'git_commits' can be configured here too.
       },
-      extensions = {
-        ['ui-select'] = {
+      extensions = { -- Configuration for Telescope extensions.
+        ['ui-select'] = { -- Settings for the telescope-ui-select.nvim extension.
+                          -- Uses Telescope's dropdown theme for UI select prompts.
           require('telescope.themes').get_dropdown(),
         },
+        -- fzf = { -- Configuration for fzf-native extension if needed.
+        --   fuzzy = true, -- Use fzf's fuzzy matching.
+        --   override_generic_sorter = true, -- Override Telescope's generic sorter.
+        --   override_file_sorter = true, -- Override Telescope's file sorter.
+        --   case_mode = "smart_case",
+        -- }
       },
     }
 
-    -- Enable Telescope extensions if they are installed
-    pcall(require('telescope').load_extension, 'fzf')
-    pcall(require('telescope').load_extension, 'ui-select')
+    -- Attempt to load Telescope extensions.
+    -- `pcall` (protected call) is used to prevent errors if an extension isn't installed.
+    pcall(require('telescope').load_extension, 'fzf') -- Load fzf-native extension.
+    pcall(require('telescope').load_extension, 'ui-select') -- Load ui-select extension.
 
-    -- See `:help telescope.builtin`
+    -- Get a reference to Telescope's built-in pickers.
     local builtin = require 'telescope.builtin'
-    local keymap = vim.keymap.set
+    local keymap = vim.keymap.set -- Shorthand for vim.keymap.set.
+
+    -- Define key mappings in Normal mode to trigger various Telescope pickers.
+    -- Each mapping has a description for display with plugins like which-key.
     keymap('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
     keymap('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
     keymap('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
-    keymap('n', '<leader>fs', builtin.builtin, { desc = '[F]ind [S]elect Telescope' })
-    keymap('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord' })
-    keymap('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep' })
-    keymap('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
-    keymap('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
+    keymap('n', '<leader>fs', builtin.builtin, { desc = '[F]ind [S]elect Telescope (list all built-in pickers)' })
+    keymap('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord (under cursor)' })
+    keymap('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep (search text in project)' })
+    keymap('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics (LSP diagnostics)' })
+    keymap('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume (reopen last Telescope picker)' })
     keymap('n', '<leader>f.', builtin.oldfiles, { desc = '[F]ind Recent Files ("." for repeat)' })
-    keymap('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+    keymap('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' }) -- Double <leader> for buffers.
 
-    -- Slightly advanced example of overriding default behavior and theme
+    -- Example of a more advanced keymap for current buffer fuzzy search with a custom theme.
     keymap('n', '<leader>/', function()
-      -- You can pass additional configuration to Telescope to change the theme, layout, etc.
       builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-        winblend = 10,
-        previewer = false,
+        winblend = 10, -- Transparency for the dropdown window.
+        previewer = false, -- Disable the previewer for this specific picker.
       })
     end, { desc = '[/] Fuzzily search in current buffer' })
 
-    -- It's also possible to pass additional configuration options.
-    --  See `:help telescope.builtin.live_grep()` for information about particular keys
+    -- Example of passing options directly to a built-in picker.
     keymap('n', '<leader>f/', function()
       builtin.live_grep {
-        grep_open_files = true,
-        prompt_title = 'Live Grep in Open Files',
+        grep_open_files = true, -- Search only in open files.
+        prompt_title = 'Live Grep in Open Files', -- Custom prompt title.
       }
     end, { desc = '[F]ind [/] in Open Files' })
   end,
